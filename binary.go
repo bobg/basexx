@@ -18,4 +18,5 @@ func (b binary) Decode(inp []byte) (int64, error) {
 	return int64(inp[0]), nil
 }
 
+// Binary is base 256 encoded the obvious way: digit value X = byte(X).
 var Binary binary

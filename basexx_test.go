@@ -2,6 +2,7 @@ package basexx
 
 import (
 	"encoding/csv"
+	"encoding/hex"
 	"fmt"
 	"io"
 	"os"
@@ -41,7 +42,25 @@ func TestConvert(t *testing.T) {
 		t.Fatal(err)
 	}
 	defer f.Close()
+
 	r := csv.NewReader(f)
+
+	do := func(val10 string, fromBase Base, fromVal string, toBase Base, want string) {
+		t.Run(fmt.Sprintf("case_%s_base%d_to_base%d", val10, fromBase.N(), toBase.N()), func(t *testing.T) {
+			src := NewBuffer([]byte(fromVal), fromBase)
+			destBuf := make([]byte, Length(fromBase.N(), toBase.N(), len(fromVal)))
+			dest := NewBuffer(destBuf[:], toBase)
+			_, err := Convert(dest, src)
+			if err != nil {
+				t.Fatal(err)
+			}
+			got := dest.Written()
+			if string(got) != want {
+				t.Errorf("got %s, want %s", string(got), want)
+			}
+		})
+	}
+
 	for {
 		vals, err := r.Read()
 		if err == io.EOF {
@@ -54,27 +73,26 @@ func TestConvert(t *testing.T) {
 			t.Fatalf("testdata row contains %d value(s), want %d", len(vals), len(bases))
 		}
 
-		do := func(val10 string, fromBase Base, fromVal string, toBase Base, want string) {
-			t.Run(fmt.Sprintf("case_%s_base%d_to_base%d", val10, fromBase.N(), toBase.N()), func(t *testing.T) {
-				src := NewBuffer([]byte(fromVal), fromBase)
-				destBuf := make([]byte, Length(fromBase.N(), toBase.N(), len(fromVal)))
-				dest := NewBuffer(destBuf[:], toBase)
-				_, err := Convert(dest, src)
-				if err != nil {
-					t.Fatal(err)
-				}
-				got := dest.Written()
-				if string(got) != want {
-					t.Errorf("got %s, want %s", string(got), want)
-				}
-			})
-		}
-
 		for i := 0; i < len(bases)-1; i++ {
 			for j := i + 1; j < len(bases); j++ {
+				// Check converting from bases[i] to bases[j] and vice versa.
 				do(vals[0], bases[i], vals[i], bases[j], vals[j])
 				do(vals[0], bases[j], vals[j], bases[i], vals[i])
 			}
 		}
+
+		// Check that converting between Base16 and Binary works the same as in encoding/hex.
+
+		val16 := vals[4]
+		if len(val16)%2 == 1 {
+			val16 = "0" + val16
+		}
+		bin, err := hex.DecodeString(val16)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		do(vals[0], Base16, val16, Binary, string(bin))
+		do(vals[0], Binary, string(bin), Base16, vals[4])
 	}
 }

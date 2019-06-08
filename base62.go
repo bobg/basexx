@@ -34,4 +34,5 @@ func (b base62) Decode(inp []byte) (int64, error) {
 	}
 }
 
+// Base62 uses digits 0..9, then a..z, then A..Z.
 var Base62 base62

@@ -3,7 +3,7 @@ package basexx
 import "io"
 
 // Buffer can act as a Source or a Dest (but not both at the same time)
-// when every byte in a given slice encodes a digit in the desired base.
+// in the case where each byte in a given slice encodes a single digit in the desired base.
 // The digits in the buffer are in the expected order:
 // namely, most-significant first, least-significant last.
 type Buffer struct {
@@ -21,9 +21,6 @@ func NewBuffer(buf []byte, base Base) *Buffer {
 	}
 }
 
-// Read produces the value of the next-less-significant digit in the Buffer
-// (reading from left to right).
-// When no digit remains it produces the error io.EOF.
 func (s *Buffer) Read() (int64, error) {
 	if s.next < 0 {
 		s.next = 0

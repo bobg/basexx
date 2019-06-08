@@ -22,4 +22,5 @@ func (b base94) Decode(inp []byte) (int64, error) {
 	return int64(digit - 33), nil
 }
 
+// Base94 uses all printable ASCII characters (33 through 126) as digits.
 var Base94 base94
