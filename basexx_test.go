@@ -20,6 +20,7 @@ func TestLength(t *testing.T) {
 		{from: 2, to: 10, n: 100, want: 31},
 		{from: 10, to: 2, n: 1, want: 4},
 		{from: 10, to: 2, n: 100, want: 333},
+		{from: 256, to: 94, n: 20, want: 25},
 	}
 
 	for i, c := range cases {

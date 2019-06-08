@@ -10,8 +10,9 @@ import (
 func ExampleConvert() {
 	const base10val = "12345"
 
-	// The basexx has no predefined Base20 type,
-	// but any base 2 through 36 can be easily defined with basexx.Alnum.
+	// The basexx package has no predefined Base20 type,
+	// but any base 2 through 36 using alphanumeric digits
+	// can be defined with basexx.Alnum.
 	base20 := basexx.Alnum(20)
 
 	// A Buffer can serve as a Source for Convert.
