@@ -1,3 +1,4 @@
+// Package basexx permits converting between digit strings of arbitrary bases.
 package basexx
 
 import (
@@ -7,11 +8,22 @@ import (
 	"math/big"
 )
 
+// Source is a source of digit values in a given base.
 type Source interface {
+	// Read produces the value of the next digit in the source.
+	// The value must be between 0 and Base()-1, inclusive.
+	// End of input is signaled with the error io.EOF.
 	Read() (int64, error)
+
+	// Base gives the base of the source.
+	// Digit values in the source must all be between 0 and Base()-1, inclusive.
+	// Behavior is undefined if the value of Base() varies during the lifetime of a source
+	// or if Base() < 2.
 	Base() int64
 }
 
+// Dest is a destination for writing digits in a given base.
+// Digits are written right-to-left, from least significant to most.
 type Dest interface {
 	Prepend(int64) error
 	Base() int64
