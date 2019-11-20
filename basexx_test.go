@@ -36,7 +36,7 @@ func TestLength(t *testing.T) {
 
 func TestConvert(t *testing.T) {
 	bases := []Base{
-		Base10, Base2, Base8, Base12, Base16, Base36, Base62, Base94, Base50,
+		Base10, Base2, Base8, Base12, Base16, Base36, Base62, Base94, Base50, Base30,
 	}
 
 	f, err := os.Open("testdata.csv")
