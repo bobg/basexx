@@ -28,6 +28,8 @@ func (b base30) Decode(inp []byte) (int64, error) {
 
 // Base30 uses digits 0-9, then lower-case bcdfghjkmnpqrstvwxyz.
 // It excludes vowels (to avoid inadvertently spelling naughty words) and the letter "l".
+// Note, this is not the same as basexx.Alnum(30),
+// which uses 0-9 and then abcdefghijklmnopqrst.
 var Base30 base30
 
 func init() {
