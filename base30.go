@@ -9,7 +9,7 @@ type base30 struct{}
 func (b base30) N() int64 { return 30 }
 
 func (b base30) Encode(val int64) ([]byte, error) {
-	if val < 0 || val > 49 {
+	if val < 0 || val > 29 {
 		return nil, ErrInvalid
 	}
 	return []byte{byte(base30digits[val])}, nil

@@ -6,8 +6,10 @@ package basexx
 // For decoding, upper-case 'A' through 'Z' are the same as lower-case.
 type Alnum int
 
+// N implements Base.N.
 func (a Alnum) N() int64 { return int64(a) }
 
+// Encode implements Base.Encode.
 func (a Alnum) Encode(val int64) ([]byte, error) {
 	if val < 0 || val >= int64(a) {
 		return nil, ErrInvalid
@@ -18,6 +20,7 @@ func (a Alnum) Encode(val int64) ([]byte, error) {
 	return []byte{byte(val) + 'a' - 10}, nil
 }
 
+// Decode implements Base.Decode.
 func (a Alnum) Decode(inp []byte) (int64, error) {
 	if len(inp) != 1 {
 		return 0, ErrInvalid
@@ -36,11 +39,24 @@ func (a Alnum) Decode(inp []byte) (int64, error) {
 }
 
 const (
-	Base2  = Alnum(2)
-	Base8  = Alnum(8)
+	// Base2 uses digits "0" and "1"
+	Base2 = Alnum(2)
+
+	// Base8 uses digits "0" through "7"
+	Base8 = Alnum(8)
+
+	// Base10 uses digits "0" through "9"
 	Base10 = Alnum(10)
+
+	// Base12 uses digits "0" through "9" plus "a" and "b"
 	Base12 = Alnum(12)
+
+	// Base16 uses digits "0" through "9" plus "a" through "f"
 	Base16 = Alnum(16)
+
+	// Base32 uses digits "0" through "9" plus "a" through "v"
 	Base32 = Alnum(32)
+
+	// Base36 uses digits "0" through "9" plus "a" through "z"
 	Base36 = Alnum(36)
 )

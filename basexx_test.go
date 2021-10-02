@@ -98,3 +98,67 @@ func TestConvert(t *testing.T) {
 		do(vals[0], Binary, string(bin), Base16, vals[4])
 	}
 }
+
+func TestEncodeDecode(t *testing.T) {
+	bases := []Base{Base30, Base50, Base62, Base94, Binary}
+	for i := 2; i <= 36; i++ {
+		bases = append(bases, Alnum(i))
+	}
+	for i, base := range bases {
+		t.Run(fmt.Sprintf("base_%d_%d", base.N(), i+1), func(t *testing.T) {
+			cases := []struct {
+				n       int64
+				s       string
+				wantErr bool
+			}{{
+				n: 0,
+				s: "0",
+			}, {
+				n: 1,
+				s: "1",
+			}, {
+				n:       -1,
+				wantErr: true,
+			}, {
+				n:       base.N(),
+				wantErr: true,
+			}}
+
+			for j, tc := range cases {
+				t.Run(fmt.Sprintf("case_%d", j+1), func(t *testing.T) {
+					got, err := base.Encode(tc.n)
+					if tc.wantErr && err != nil {
+						return
+					}
+					if err != nil {
+						t.Fatal(err)
+					}
+					if tc.wantErr {
+						t.Fatal("got no error but wanted one")
+					}
+
+					// Handle base94 and base256 specially.
+					want := tc.s
+					switch base.N() {
+					case 94:
+						want = string([]byte{'!' + byte(tc.n)})
+					case 256:
+						want = string([]byte{byte(tc.n)})
+					}
+
+					if string(got) != want {
+						t.Fatalf("got %s, want %s", string(got), want)
+					}
+
+					got2, err := base.Decode(got)
+					if err != nil {
+						t.Fatal(err)
+					}
+					if got2 != tc.n {
+						t.Errorf("got base %d, want %d", got2, tc.n)
+					}
+				})
+			}
+		})
+	}
+}

@@ -21,6 +21,7 @@ func NewBuffer(buf []byte, base Base) *Buffer {
 	}
 }
 
+// Read implements io.Reader.
 func (s *Buffer) Read() (int64, error) {
 	if s.next < 0 {
 		s.next = 0
@@ -36,6 +37,8 @@ func (s *Buffer) Read() (int64, error) {
 	return dec, nil
 }
 
+// Prepend prepends the digit with the given value,
+// encoded according to the buffer's Base.
 func (s *Buffer) Prepend(val int64) error {
 	if s.next < 0 {
 		s.next = len(s.buf)
@@ -55,6 +58,7 @@ func (s *Buffer) Prepend(val int64) error {
 	return nil
 }
 
+// Written returns the slice of encoded digits contained in the buffer.
 func (s *Buffer) Written() []byte {
 	if s.next < 0 {
 		return nil
@@ -62,6 +66,7 @@ func (s *Buffer) Written() []byte {
 	return s.buf[s.next:]
 }
 
+// Base tells the buffer's Base.
 func (s *Buffer) Base() int64 {
 	return s.base.N()
 }
