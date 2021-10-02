@@ -29,7 +29,7 @@ func (s *Buffer) Read() (int64, error) {
 	if s.next >= len(s.buf) {
 		return 0, io.EOF
 	}
-	dec, err := s.base.Decode([]byte{s.buf[s.next]})
+	dec, err := s.base.Decode(s.buf[s.next])
 	if err != nil {
 		return 0, err
 	}
@@ -50,11 +50,8 @@ func (s *Buffer) Prepend(val int64) error {
 	if err != nil {
 		return err
 	}
-	if len(enc) != 1 {
-		return ErrInvalid
-	}
 	s.next--
-	s.buf[s.next] = enc[0]
+	s.buf[s.next] = enc
 	return nil
 }
 

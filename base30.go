@@ -8,18 +8,15 @@ type base30 struct{}
 
 func (b base30) N() int64 { return 30 }
 
-func (b base30) Encode(val int64) ([]byte, error) {
+func (b base30) Encode(val int64) (byte, error) {
 	if val < 0 || val > 29 {
-		return nil, ErrInvalid
-	}
-	return []byte{byte(base30digits[val])}, nil
-}
-
-func (b base30) Decode(inp []byte) (int64, error) {
-	if len(inp) != 1 {
 		return 0, ErrInvalid
 	}
-	val := base30digitVals[inp[0]]
+	return byte(base30digits[val]), nil
+}
+
+func (b base30) Decode(inp byte) (int64, error) {
+	val := base30digitVals[inp]
 	if val < 0 {
 		return 0, ErrInvalid
 	}

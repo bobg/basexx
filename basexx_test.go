@@ -162,3 +162,50 @@ func TestEncodeDecode(t *testing.T) {
 		})
 	}
 }
+
+func TestDigits(t *testing.T) {
+	cases := []struct {
+		val  int64
+		base Base
+		want string
+	}{{
+		val: 0, base: Base2, want: "0",
+	}, {
+		val: 0, base: Base36, want: "0",
+	}, {
+		val: 1, base: Base2, want: "1",
+	}, {
+		val: 1, base: Base36, want: "1",
+	}, {
+		val: 10, base: Base2, want: "1010",
+	}, {
+		val: 10, base: Base36, want: "a",
+	}, {
+		val: 42, base: Base2, want: "101010",
+	}, {
+		val: 42, base: Base36, want: "16",
+	}, {
+		val: 42, base: Base30, want: "1d",
+	}, {
+		val: 42, base: Base50, want: "R",
+	}}
+
+	for i, tc := range cases {
+		t.Run(fmt.Sprintf("case_%d", i+1), func(t *testing.T) {
+			got, err := Digits(tc.val, tc.base)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got != tc.want {
+				t.Fatalf("got %s, want %s", got, tc.want)
+			}
+			got2, err := Value(got, tc.base)
+			if err != nil {
+				t.Fatal(err)
+			}
+			if got2 != tc.val {
+				t.Errorf("got back %d, want %d", got2, tc.val)
+			}
+		})
+	}
+}

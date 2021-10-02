@@ -10,22 +10,18 @@ type Alnum int
 func (a Alnum) N() int64 { return int64(a) }
 
 // Encode implements Base.Encode.
-func (a Alnum) Encode(val int64) ([]byte, error) {
+func (a Alnum) Encode(val int64) (byte, error) {
 	if val < 0 || val >= int64(a) {
-		return nil, ErrInvalid
+		return 0, ErrInvalid
 	}
 	if val < 10 {
-		return []byte{byte(val) + '0'}, nil
+		return byte(val) + '0', nil
 	}
-	return []byte{byte(val) + 'a' - 10}, nil
+	return byte(val) + 'a' - 10, nil
 }
 
 // Decode implements Base.Decode.
-func (a Alnum) Decode(inp []byte) (int64, error) {
-	if len(inp) != 1 {
-		return 0, ErrInvalid
-	}
-	digit := byte(inp[0])
+func (a Alnum) Decode(digit byte) (int64, error) {
 	switch {
 	case '0' <= digit && digit <= '9':
 		return int64(digit - '0'), nil

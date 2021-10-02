@@ -4,24 +4,20 @@ type base62 struct{}
 
 func (b base62) N() int64 { return 62 }
 
-func (b base62) Encode(val int64) ([]byte, error) {
+func (b base62) Encode(val int64) (byte, error) {
 	if val < 0 || val > 61 {
-		return nil, ErrInvalid
-	}
-	if val < 10 {
-		return []byte{byte(val) + '0'}, nil
-	}
-	if val < 36 {
-		return []byte{byte(val) - 10 + 'a'}, nil
-	}
-	return []byte{byte(val) - 36 + 'A'}, nil
-}
-
-func (b base62) Decode(inp []byte) (int64, error) {
-	if len(inp) != 1 {
 		return 0, ErrInvalid
 	}
-	digit := byte(inp[0])
+	if val < 10 {
+		return byte(val) + '0', nil
+	}
+	if val < 36 {
+		return byte(val) - 10 + 'a', nil
+	}
+	return byte(val) - 36 + 'A', nil
+}
+
+func (b base62) Decode(digit byte) (int64, error) {
 	switch {
 	case '0' <= digit && digit <= '9':
 		return int64(digit - '0'), nil

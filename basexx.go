@@ -43,12 +43,12 @@ type Base interface {
 	// or if N() < 2.
 	N() int64
 
-	// Encode converts a digit value to the string of bytes representing its digit.
+	// Encode converts a digit value to the byte representing its digit.
 	// The input must be a valid digit value between 0 and N()-1, inclusive.
-	Encode(int64) ([]byte, error)
+	Encode(int64) (byte, error)
 
-	// Decode converts a string of bytes representing a digit into its numeric value.
-	Decode([]byte) (int64, error)
+	// Decode converts an encoded digit byte into its numeric value.
+	Decode(byte) (int64, error)
 }
 
 // ErrInvalid is used for invalid input to Base.Encode and Base.Decode.
@@ -106,4 +106,45 @@ func Length(from, to int64, n int) int {
 	ratio := math.Log(float64(from)) / math.Log(float64(to))
 	result := float64(n) * ratio
 	return int(math.Ceil(result))
+}
+
+// Digits converts a (non-negative) integer into a digit string in the given base.
+func Digits(val int64, base Base) (string, error) {
+	if val < 0 {
+		return "", errors.New("value must not be negative")
+	}
+	if val == 0 {
+		return "0", nil
+	}
+
+	var (
+		bufbytes = make([]byte, Length(256, base.N(), 8))
+		buf      = NewBuffer(bufbytes, base)
+	)
+
+	for val > 0 {
+		d := val % base.N()
+		err := buf.Prepend(d)
+		if err != nil {
+			return "", err
+		}
+		val /= base.N()
+	}
+
+	return string(buf.Written()), nil
+}
+
+// Value converts a digit string in the given base into its integer value.
+func Value(inp string, base Base) (int64, error) {
+	var result int64
+	for i := 0; i < len(inp); i++ {
+		digit := inp[i]
+		digitval, err := base.Decode(digit)
+		if err != nil {
+			return 0, err
+		}
+		result *= base.N()
+		result += digitval
+	}
+	return result, nil
 }

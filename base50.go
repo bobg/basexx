@@ -8,18 +8,15 @@ type base50 struct{}
 
 func (b base50) N() int64 { return 50 }
 
-func (b base50) Encode(val int64) ([]byte, error) {
+func (b base50) Encode(val int64) (byte, error) {
 	if val < 0 || val > 49 {
-		return nil, ErrInvalid
-	}
-	return []byte{byte(base50digits[val])}, nil
-}
-
-func (b base50) Decode(inp []byte) (int64, error) {
-	if len(inp) != 1 {
 		return 0, ErrInvalid
 	}
-	val := base50digitVals[inp[0]]
+	return byte(base50digits[val]), nil
+}
+
+func (b base50) Decode(inp byte) (int64, error) {
+	val := base50digitVals[inp]
 	if val < 0 {
 		return 0, ErrInvalid
 	}
