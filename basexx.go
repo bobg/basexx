@@ -59,8 +59,11 @@ var zero = new(big.Int)
 // Convert converts the digits of src, writing them to dest.
 // Both src and dest specify their bases.
 // Return value is the number of digits written to dest (even in case of error).
+//
 // This function consumes all of src before producing any of dest,
 // so it may not be suitable for input streams of arbitrary length.
+// In particular,
+// do not expect to be able to use it for encoding byte streams the way you can with e.g. encoding/base64.
 func Convert(dest Dest, src Source) (int, error) {
 	var (
 		accum    = new(big.Int)

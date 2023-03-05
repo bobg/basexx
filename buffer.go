@@ -13,6 +13,11 @@ type Buffer struct {
 }
 
 // NewBuffer produces a Buffer from the given byte slice described by the given Base.
+//
+// When the Buffer is to be used as a Dest in a call to Convert,
+// the supplied []byte must have length >= Length(from, base.N(), digits)
+// where `from` is the base you're converting from
+// and `digits` is the number of digits being converted.
 func NewBuffer(buf []byte, base Base) *Buffer {
 	return &Buffer{
 		buf:  buf,

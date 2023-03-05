@@ -17,7 +17,7 @@ To get the Base30 encoding of the number 412:
 result, err := basexx.Digits(412, basexx.Base30)
 ```
 
-To decode the base30 digit string `"fr"`:
+To decode the Base30 digit string `"fr"`:
 
 ```go
 result, err := basexx.Value("fr", basexx.Base30)
