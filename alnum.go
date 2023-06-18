@@ -9,19 +9,19 @@ type Alnum int
 // N implements Base.N.
 func (a Alnum) N() int64 { return int64(a) }
 
-// Encode implements Base.Encode.
-func (a Alnum) Encode(val int64) (byte, error) {
+// Digit implements Base.Digit.
+func (a Alnum) Digit(val int64) (byte, error) {
 	if val < 0 || val >= int64(a) {
 		return 0, ErrInvalid
 	}
 	if val < 10 {
 		return byte(val) + '0', nil
 	}
-	return byte(val) + 'a' - 10, nil
+	return byte(val) - 10 + 'a', nil
 }
 
 // Decode implements Base.Decode.
-func (a Alnum) Decode(digit byte) (int64, error) {
+func (a Alnum) Val(digit byte) (int64, error) {
 	switch {
 	case '0' <= digit && digit <= '9':
 		return int64(digit - '0'), nil

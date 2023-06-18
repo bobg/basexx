@@ -1,54 +1,18 @@
-// Package basexx permits converting between digit strings of arbitrary bases.
 package basexx
 
 import (
-	"errors"
+	"bufio"
 	"io"
-	"math"
 	"math/big"
+	"strings"
+
+	"github.com/pkg/errors"
 )
 
-// Source is a source of digit values in a given base.
-type Source interface {
-	// Read produces the value of the next-least-significant digit in the source.
-	// The value must be between 0 and Base()-1, inclusive.
-	// End of input is signaled with the error io.EOF.
-	Read() (int64, error)
-
-	// Base gives the base of the Source.
-	// Digit values in the Source must all be between 0 and Base()-1, inclusive.
-	// Behavior is undefined if the value of Base() varies during the lifetime of a Source
-	// or if Base() < 2.
-	Base() int64
-}
-
-// Dest is a destination for writing digits in a given base.
-// Digits are written right-to-left, from least significant to most.
-type Dest interface {
-	// Prepend encodes the next-most-significant digit value and prepends it to the destination.
-	Prepend(int64) error
-
-	// Base gives the base of the Dest.
-	// Digit values in the Dest must all be between 0 and Base()-1, inclusive.
-	// Behavior is undefined if the value of Base() varies during the lifetime of a Dest
-	// or if Base() < 2.
-	Base() int64
-}
-
-// Base is the type of a base.
 type Base interface {
-	// N is the number of the base,
-	// i.e. the number of unique digits.
-	// Behavior is undefined if the value of N() varies during the lifetime of a Base
-	// or if N() < 2.
 	N() int64
-
-	// Encode converts a digit value to the byte representing its digit.
-	// The input must be a valid digit value between 0 and N()-1, inclusive.
-	Encode(int64) (byte, error)
-
-	// Decode converts an encoded digit byte into its numeric value.
-	Decode(byte) (int64, error)
+	Val(byte) (int64, error)
+	Digit(int64) (byte, error)
 }
 
 // ErrInvalid is used for invalid input to Base.Encode and Base.Decode.
@@ -56,98 +20,93 @@ var ErrInvalid = errors.New("invalid")
 
 var zero = new(big.Int)
 
-// Convert converts the digits of src, writing them to dest.
-// Both src and dest specify their bases.
-// Return value is the number of digits written to dest (even in case of error).
-//
-// This function consumes all of src before producing any of dest,
-// so it may not be suitable for input streams of arbitrary length.
-// In particular,
-// do not expect to be able to use it for encoding byte streams the way you can with e.g. encoding/base64.
-func Convert(dest Dest, src Source) (int, error) {
+// Decode decodes an integer expressed as a string in the given base.
+func Decode(inp io.Reader, base Base) (*big.Int, error) {
+	var rr io.ByteReader
+	if r, ok := inp.(io.ByteReader); ok {
+		rr = r
+	} else {
+		rr = bufio.NewReader(inp)
+	}
+
 	var (
-		accum    = new(big.Int)
-		srcBase  = big.NewInt(src.Base())
-		destBase = big.NewInt(dest.Base())
+		result = new(big.Int)
+		n      = big.NewInt(base.N())
 	)
 	for {
-		digit, err := src.Read()
-		if err == io.EOF {
-			break
+		digit, err := rr.ReadByte()
+		if errors.Is(err, io.EOF) {
+			return result, nil
 		}
 		if err != nil {
-			return 0, err
+			return nil, errors.Wrap(err, "reading input")
 		}
-		accum.Mul(accum, srcBase)
-		if digit != 0 {
-			accum.Add(accum, big.NewInt(digit))
-		}
-	}
-	var written int
-	for accum.Cmp(zero) > 0 {
-		r := new(big.Int)
-		accum.QuoRem(accum, destBase, r)
-		err := dest.Prepend(r.Int64())
+		val, err := base.Val(digit)
 		if err != nil {
-			return written, err
+			return nil, errors.Wrap(err, "invalid digit")
 		}
-		written++
+		result.Mul(result, n)
+		result.Add(result, big.NewInt(val))
 	}
-	if written == 0 {
-		err := dest.Prepend(0)
-		if err != nil {
-			return written, err
-		}
-		written++
-	}
-	return written, nil
 }
 
-// Length computes the maximum number of digits needed
-// to convert `n` digits in base `from` to base `to`.
-func Length(from, to int64, n int) int {
-	ratio := math.Log(float64(from)) / math.Log(float64(to))
-	result := float64(n) * ratio
-	return int(math.Ceil(result))
+// DecodeString decodes a string in the given base.
+func DecodeString(s string, base Base) (*big.Int, error) {
+	return Decode(strings.NewReader(s), base)
 }
 
-// Digits converts a (non-negative) integer into a digit string in the given base.
-func Digits(val int64, base Base) (string, error) {
-	if val < 0 {
-		return "", errors.New("value must not be negative")
-	}
-	if val == 0 {
-		return "0", nil
-	}
-
+// Encode encodes inp as a string in the given base.
+// If inp is negative, it is silently made positive.
+func Encode(out io.Writer, inp *big.Int, base Base) error {
 	var (
-		bufbytes = make([]byte, Length(256, base.N(), 8))
-		buf      = NewBuffer(bufbytes, base)
+		digits []byte
+		n      = big.NewInt(base.N())
 	)
 
-	for val > 0 {
-		d := val % base.N()
-		err := buf.Prepend(d)
+	switch inp.Sign() {
+	case -1:
+		inp = new(big.Int).Neg(inp)
+	case 0:
+		result, err := base.Digit(0)
 		if err != nil {
-			return "", err
+			return errors.Wrap(err, "invalid digit")
 		}
-		val /= base.N()
+		_, err = out.Write([]byte{result})
+		return errors.Wrap(err, "writing output")
 	}
 
-	return string(buf.Written()), nil
+	for inp.Cmp(zero) > 0 {
+		_, m := inp.DivMod(inp, n, new(big.Int))
+		digit, err := base.Digit(m.Int64())
+		if err != nil {
+			return errors.Wrap(err, "invalid digit")
+		}
+		digits = append(digits, digit)
+	}
+
+	// Reverse digits in place.
+	for i, j := 0, len(digits)-1; i < j; i, j = i+1, j-1 {
+		digits[i], digits[j] = digits[j], digits[i]
+	}
+
+	_, err := out.Write(digits)
+	return errors.Wrap(err, "writing output")
 }
 
-// Value converts a digit string in the given base into its integer value.
-func Value(inp string, base Base) (int64, error) {
-	var result int64
-	for i := 0; i < len(inp); i++ {
-		digit := inp[i]
-		digitval, err := base.Decode(digit)
-		if err != nil {
-			return 0, err
-		}
-		result *= base.N()
-		result += digitval
+// EncodeInt64 encodes an integer as a string in the given base.
+// If inp is negative, it is silently made positive.
+func EncodeInt64(w io.Writer, inp int64, base Base) error {
+	return Encode(w, big.NewInt(inp), base)
+}
+
+// Convert converts a string from one base to another.
+func Convert(inp string, from, to Base) (string, error) {
+	n, err := DecodeString(inp, from)
+	if err != nil {
+		return "", err
 	}
-	return result, nil
+
+	var sb strings.Builder
+	err = Encode(&sb, n, to)
+	return sb.String(), errors.Wrap(err, "encoding")
 }

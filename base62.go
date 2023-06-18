@@ -4,7 +4,7 @@ type base62 struct{}
 
 func (b base62) N() int64 { return 62 }
 
-func (b base62) Encode(val int64) (byte, error) {
+func (b base62) Digit(val int64) (byte, error) {
 	if val < 0 || val > 61 {
 		return 0, ErrInvalid
 	}
@@ -17,7 +17,7 @@ func (b base62) Encode(val int64) (byte, error) {
 	return byte(val) - 36 + 'A', nil
 }
 
-func (b base62) Decode(digit byte) (int64, error) {
+func (b base62) Val(digit byte) (int64, error) {
 	switch {
 	case '0' <= digit && digit <= '9':
 		return int64(digit - '0'), nil
