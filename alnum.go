@@ -20,7 +20,7 @@ func (a Alnum) Digit(val int64) (byte, error) {
 	return byte(val) - 10 + 'a', nil
 }
 
-// Decode implements Base.Decode.
+// Val implements Base.Val.
 func (a Alnum) Val(digit byte) (int64, error) {
 	switch {
 	case '0' <= digit && digit <= '9':

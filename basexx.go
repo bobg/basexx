@@ -1,3 +1,4 @@
+// Package basexx provides functions for converting numbers to and from strings in arbitrary bases.
 package basexx
 
 import (
@@ -6,16 +7,24 @@ import (
 	"math/big"
 	"strings"
 
+	"github.com/bobg/go-generics/v2/slices"
 	"github.com/pkg/errors"
 )
 
+// Base is the abstract type of a number base.
 type Base interface {
+	// N is the number of digits in the base.
+	// It must be at least 2 and at most 256.
 	N() int64
+
+	// Val is the value of the given digit in this base.
 	Val(byte) (int64, error)
+
+	// Digit is the digit with the given value in this base.
 	Digit(int64) (byte, error)
 }
 
-// ErrInvalid is used for invalid input to Base.Encode and Base.Decode.
+// ErrInvalid is returned when a digit or a value is out of range.
 var ErrInvalid = errors.New("invalid")
 
 var zero = new(big.Int)
@@ -84,10 +93,7 @@ func Encode(out io.Writer, inp *big.Int, base Base) error {
 		digits = append(digits, digit)
 	}
 
-	// Reverse digits in place.
-	for i, j := 0, len(digits)-1; i < j; i, j = i+1, j-1 {
-		digits[i], digits[j] = digits[j], digits[i]
-	}
+	slices.Reverse(digits)
 
 	_, err := out.Write(digits)
 	return errors.Wrap(err, "writing output")
