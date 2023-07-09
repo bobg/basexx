@@ -14,26 +14,21 @@ and vice versa.
 To get the Base30 encoding of the number 412:
 
 ```go
-result, err := basexx.Digits(412, basexx.Base30)
+var sb strings.Builder
+if err := basexx.EncodeInt64(&sb, 412, basexx.Base30); err != nil { ... }
+result := sb.String()
 ```
 
 To decode the Base30 digit string `"fr"`:
 
 ```go
-result, err := basexx.Value("fr", basexx.Base30)
+result, err := basexx.DecodeString("fr", basexx.Base30)
 ```
 
 To convert a digit string `x` in base `from` to a new digit string in base `to`:
 
 ```go
-var (
-  src     = basexx.NewBuffer(x, from)
-  destbuf = make([]byte, basexx.Length(from, to, len(x)))
-  dest    = basexx.NewBuffer(destbuf, to)
-)
-_, err := Convert(dest, src)
-if err != nil { ... }
-result := dest.Written()
+result, err := basexx.Convert(x, from, to)
 ```
 
 To define your own new number base:
@@ -44,14 +39,14 @@ type ReverseBase10 struct{}
 
 func (ReverseBase10) N() int64 { return 10 }
 
-func (ReverseBase10) Encode(val int64) (byte, error) {
+func (ReverseBase10) Digit(val int64) (byte, error) {
   if val < 0 || val > 9 {
     return 0, errors.New("digit value out of range")
   }
   return byte('9' - val), nil
 }
 
-func (ReverseBase10) Decode(digit byte) (int64, error) {
+func (ReverseBase10) Val(digit byte) (int64, error) {
   if digit < '0’ || digit > '9' {
     return 0, errors.New("invalid encoded digit")
   }
