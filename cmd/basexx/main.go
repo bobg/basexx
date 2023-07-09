@@ -8,7 +8,7 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/bobg/basexx"
+	"github.com/bobg/basexx/v2"
 )
 
 func main() {
@@ -55,15 +55,9 @@ func main() {
 }
 
 func do(inp string, from, to basexx.Base) {
-	var (
-		src     = basexx.NewBuffer([]byte(inp), from)
-		destBuf = make([]byte, basexx.Length(from.N(), to.N(), len(inp)))
-		dest    = basexx.NewBuffer(destBuf, to)
-	)
-	_, err := basexx.Convert(dest, src)
+	dest, err := basexx.Convert(inp, from, to)
 	if err != nil {
 		log.Fatal(err)
 	}
-	result := dest.Written()
-	fmt.Println(string(result))
+	fmt.Println(dest)
 }

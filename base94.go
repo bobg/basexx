@@ -4,15 +4,14 @@ type base94 struct{}
 
 func (b base94) N() int64 { return 94 }
 
-func (b base94) Encode(val int64) (byte, error) {
+func (b base94) Digit(val int64) (byte, error) {
 	if val < 0 || val > 93 {
 		return 0, ErrInvalid
 	}
 	return byte(val + 33), nil
 }
 
-func (b base94) Decode(inp byte) (int64, error) {
-	digit := inp
+func (b base94) Val(digit byte) (int64, error) {
 	if digit < 33 || digit > 126 {
 		return 0, ErrInvalid
 	}

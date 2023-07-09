@@ -4,14 +4,14 @@ type binary struct{}
 
 func (b binary) N() int64 { return 256 }
 
-func (b binary) Encode(val int64) (byte, error) {
+func (b binary) Digit(val int64) (byte, error) {
 	if val < 0 || val > 255 {
 		return 0, ErrInvalid
 	}
 	return byte(val), nil
 }
 
-func (b binary) Decode(inp byte) (int64, error) {
+func (b binary) Val(inp byte) (int64, error) {
 	return int64(inp), nil
 }
 
