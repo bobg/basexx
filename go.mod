@@ -7,4 +7,7 @@ require (
 	github.com/pkg/errors v0.9.1
 )
 
-require golang.org/x/exp v0.0.0-20230213192124-5e25df0256eb // indirect
+require (
+	github.com/mattn/go-sqlite3 v1.14.17 // indirect
+	golang.org/x/exp v0.0.0-20230626212559-97b1e661b5df // indirect
+)
