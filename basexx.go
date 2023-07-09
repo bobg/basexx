@@ -101,8 +101,8 @@ func Encode(out io.Writer, inp *big.Int, base Base) error {
 
 // EncodeInt64 encodes an integer as a string in the given base.
 // If inp is negative, it is silently made positive.
-func EncodeInt64(w io.Writer, inp int64, base Base) error {
-	return Encode(w, big.NewInt(inp), base)
+func EncodeInt64(out io.Writer, inp int64, base Base) error {
+	return Encode(out, big.NewInt(inp), base)
 }
 
 // Convert converts a string from one base to another.
