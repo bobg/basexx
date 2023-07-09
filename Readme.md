@@ -1,7 +1,7 @@
 # Basexx - Convert between digit strings and various number bases
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/bobg/basexx.svg)](https://pkg.go.dev/github.com/bobg/basexx)
-[![Go Report Card](https://goreportcard.com/badge/github.com/bobg/basexx)](https://goreportcard.com/report/github.com/bobg/basexx)
+[![Go Reference](https://pkg.go.dev/badge/github.com/bobg/v2/basexx.svg)](https://pkg.go.dev/github.com/bobg/basexx/v2)
+[![Go Report Card](https://goreportcard.com/badge/github.com/bobg/basexx/v2)](https://goreportcard.com/report/github.com/bobg/basexx/v2)
 [![Tests](https://github.com/bobg/basexx/actions/workflows/go.yml/badge.svg)](https://github.com/bobg/basexx/actions/workflows/go.yml)
 [![Coverage Status](https://coveralls.io/repos/github/bobg/basexx/badge.svg?branch=master)](https://coveralls.io/github/bobg/basexx?branch=master)
 
