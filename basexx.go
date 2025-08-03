@@ -5,10 +5,10 @@ import (
 	"bufio"
 	"io"
 	"math/big"
+	"slices"
 	"strings"
 
-	"github.com/bobg/go-generics/v2/slices"
-	"github.com/pkg/errors"
+	"github.com/bobg/errors"
 )
 
 // Base is the abstract type of a number base.
